@@ -18,12 +18,11 @@ public extension Plugin {
     }
 }
 
-try HungryDev().publish(using: [
+try CaterpillarDev().publish(using: [
     .installPlugin(.usLocaleDateFormatter()),
     .installPlugin(.splash(withClassPrefix: "")),
     .addMarkdownFiles(),
     .sortItems(by: \.date, order: .descending),
-    .generateHTML(withTheme: .hungry),
+    .generateHTML(withTheme: .caterpillar),
     .generateSiteMap(),
-    .copyFile(at: "Resources/CNAME")
 ])

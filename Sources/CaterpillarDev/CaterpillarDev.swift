@@ -9,7 +9,7 @@ import Foundation
 import Publish
 import Plot
 
-struct HungryDev: Website {
+struct CaterpillarDev: Website {
     enum SectionID: String, WebsiteSectionID {
         case posts
     }
@@ -18,8 +18,8 @@ struct HungryDev: Website {
         let date: Date
     }
 
-    var url = URL(string: "https://hungry.dev")!
-    var name = "hungry.dev"
+    var url = URL(string: "caterpillarDev.github.io")!
+    var name = "caterpillarDev"
     var description = "Personal blog."
     var language: Language { .english }
     var imagePath: Path? { nil }
