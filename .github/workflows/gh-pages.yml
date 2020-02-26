@@ -23,9 +23,8 @@ jobs:
         cd Publish
         swift build -c release
         sudo install .build/release/publish-cli /usr/local/bin/publish
-
     - name: Generate Site
-      run: publish run
+      run: publish generate
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2
