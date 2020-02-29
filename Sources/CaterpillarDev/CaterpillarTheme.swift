@@ -40,6 +40,7 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
                 )
             )
         }
+    
 
         func makeSectionHTML(for section: Section<Site>,
                              context: PublishingContext<Site>) throws -> HTML {
