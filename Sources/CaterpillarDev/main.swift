@@ -22,6 +22,7 @@ try CaterpillarDev().publish(using: [
     .installPlugin(.usLocaleDateFormatter()),
     .installPlugin(.splash(withClassPrefix: "")),
     .addMarkdownFiles(),
+    .copyResources(),
     .sortItems(by: \.date, order: .descending),
     .generateHTML(withTheme: .caterpillar),
     .generateSiteMap(),
