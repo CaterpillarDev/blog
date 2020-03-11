@@ -119,11 +119,31 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
                             )
                         ),
                         marginY: 3
+                    ),
+                    .container(
+                      .p(
+                            .class("text-small text-gray v-align-middle"),
+                            .text("Reach me on "),
+                            .a(
+                                .text("LinkedIn"),
+                                .href("https://www.linkedin.com/in/nikolamatijevic")
+                            ),
+                            .text(" or "),
+                            .a(
+                                .text("Twitter"),
+                                .href("https://twitter.com/nmatijevic1")
+                            )
+                        ),
+                        marginY: 3
                     )
                 )
             )
         }
-
+//        .a(
+//        .class("text-gray-dark no-underline"),
+//        .text("caterpillar.dev"),
+//        .href("/")
+//        )
         static func itemList<T: Website>(for items: [Item<T>], on site: T) -> Node {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "d MMM"
