@@ -15,7 +15,7 @@ struct R {
     static let hostURL = URL(string: "https://your-website-url.com")!
     static let headerTitle = """
 Helping young and unexperienced developers  achieve sustainable competitive advantage and jump over the gap between school system and actual tech world.
-It covers iOS development topics, design patterns and programming principles.
+Covering iOS development topics, design patterns and programming principles.
 Besides pure development topics, main focus is on secure development and practises as well as software architectures.
 """
     static let posts = "Posts"

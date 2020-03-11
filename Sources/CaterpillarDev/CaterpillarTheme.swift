@@ -121,6 +121,7 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
                         marginY: 3
                     ),
                     .container(
+                        .class("d-flex flex-justify-center"),
                       .p(
                             .class("text-small text-gray v-align-middle"),
                             .text("Reach me on "),
