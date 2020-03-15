@@ -68,6 +68,10 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
                             .class("text-small text-gray"),
                             .text(dateFormatter.string(from: item.date))
                         ),
+                        .p(
+                            .class("text-small text-gray"),
+                            .text("Reading time: \((item.metadata as! CaterpillarDev.ItemMetadata).readingTime)mins")
+                        ),
                         .contentBody(item.body)
                     ),
                     .footer(for: context.site)
@@ -140,11 +144,7 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
                 )
             )
         }
-//        .a(
-//        .class("text-gray-dark no-underline"),
-//        .text("caterpillar.dev"),
-//        .href("/")
-//        )
+
         static func itemList<T: Website>(for items: [Item<T>], on site: T) -> Node {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "d MMM"
