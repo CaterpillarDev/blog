@@ -149,11 +149,11 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "d MMM"
 
-            let itemsPerYear: [Int: [Item<T>]] = items.reduce(into: [:]) { result, item in
-                result[item.date.year, default: []].append(item)
+            let itemsPerCategory: [String: [Item<T>]] = items.reduce(into: [:]) { result, item in
+                result[(item.metadata as! CaterpillarDev.ItemMetadata).section, default: []].append(item)
             }
 
-            return .forEach(itemsPerYear) {
+            return .forEach(itemsPerCategory) {
                 .div(
                     .h3("\($0.key)"),
                     .forEach($0.value) { item in

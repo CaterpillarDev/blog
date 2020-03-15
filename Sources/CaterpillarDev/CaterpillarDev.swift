@@ -17,6 +17,7 @@ struct CaterpillarDev: Website {
     struct ItemMetadata: WebsiteItemMetadata {
         let date: Date
         let readingTime: String
+        let section: String
     }
 
     var url = URL(string: "caterpillarDev.github.io")!
@@ -25,3 +26,4 @@ struct CaterpillarDev: Website {
     var language: Language { .english }
     var imagePath: Path? { nil }
 }
+

@@ -1,6 +1,7 @@
 ---
 date: 2020-03-15 23:00
 readingTime: 10
+section: Design patterns
 ---
 
 # MVC - model view controller 
