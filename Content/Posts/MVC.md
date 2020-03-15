@@ -20,7 +20,7 @@ There is a significant differnce in communication between Controller-Model and M
 
 Controller directly references the model, being dependent on it. Model is central part of the entire desing pattern, holding all the business logic of the software system itself. _Business logic_ presents real-world business rules you are trying to replicate in form of a software. That makes model the most important part of the system, absolutely _independent_ of all other components.
 
-If you take a closer look at the graph itself, you notice that there is a discontinous line pointing from model to view. This doesn't mean that model actually references the view itself. The way model _updates_[2] the view is a blind communication, meaning that model doesn't have an idea about the view. One example of this type of communication is notification pattern which is presented in code samples below.
+If you take a closer look at the graph itself, you notice that there is a discontinous line pointing from model to view. This doesn't mean that model actually references the view itself. The way model _updates_[2] the view is a blind communication, meaning that model doesn't have an idea about the view. One example of this type of communication is notification pattern which is presented in code samples below. Official apple documentation can be found [here](https://developer.apple.com/documentation/foundation/notificationcenter).
 
 ## Code Samples
 
