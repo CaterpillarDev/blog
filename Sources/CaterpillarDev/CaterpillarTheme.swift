@@ -152,8 +152,12 @@ private struct CaterpillarHTMLFactory<Site: Website>: HTMLFactory {
             let itemsPerCategory: [String: [Item<T>]] = items.reduce(into: [:]) { result, item in
                 result[(item.metadata as! CaterpillarDev.ItemMetadata).section, default: []].append(item)
             }
-
-            return .forEach(itemsPerCategory) {
+            
+            let sortedCategories = itemsPerCategory.sorted { category1, category2 in
+                category1.value.first!.date.compare(category2.value.first!.date) == .orderedDescending
+            }
+    
+            return .forEach(sortedCategories) {
                 .div(
                     .h3("\($0.key)"),
                     .forEach($0.value) { item in
