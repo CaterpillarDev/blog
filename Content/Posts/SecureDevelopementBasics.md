@@ -26,7 +26,7 @@ This means that your app **cannot access** data from other apps, as well as the 
 
 Every mobile app gathers user relevant information. Personal information such as date of birth, usernames and passwords are usually stored on the client side to allow better personalisation content personalisation and user experience. Collecting data brings a lot of responsibility which leads us to the first point :
 
-> ### **The most secure data is the data you don’t collect.**
+>  **The most secure data is the data you don’t collect.**
 
 The point you can get from this is:
 
