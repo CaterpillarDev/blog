@@ -47,7 +47,7 @@ The most important difference between these two is that **Keychain is encrypted*
 Accessing UserDefaults is rather simple. Just use the provided singleton:
 
 ```swift
-	UserDefaults.standard.set("Caterpillar", forKey: "dev")
+  UserDefaults.standard.set("Caterpillar", forKey: "dev")
 ```
 
 When it comes to Keychain that is where it starts getting problematic. API that is available from Apple has been around since iOS 2.0 and the API is not really _swifty_. That is why developers mostly rely on using third party libraries which allow storage in a similar form to UserDefaults example above. One of the most commonly used libraries is [KeychainAccess](https://cocoapods.org/pods/KeychainAccess). 
