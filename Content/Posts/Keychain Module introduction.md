@@ -55,7 +55,7 @@ Keys differentiate based on operation you need to perform. If you want to perfor
 
 Even though asymmetric encryption "guarantees" the hard part is transfering the keys through the network between, for example, client app and a server. That is where digital certificates come into play. They are used for secure distribution of public part of the key.The most known format is X.509 which is presented in the image below:
 
-![X.509.png](/Images/X509.png)
+![X.509.png](/images/X509.png)
 
 Source: Apple <sup>[1]</sup>
 
