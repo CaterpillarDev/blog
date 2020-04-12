@@ -1,15 +1,25 @@
+body {
+    background-color: #343446 !important;
+    color: #fff !important;
+}
+
+a {
+    color: #00b8ff !important;
+}
+
 pre {
     margin-bottom: 1.5em;
-    background-color: #1a1a1a;
+    background-color: #252532 !important;
     padding: 16px 0;
     border-radius: 16px;
+    box-shadow: 6px 6px 12px #2c2c3c, -6px -6px 12px #3c3c51 !important;
 }
 
 pre code {
     font-family: monospace;
     display: block;
     padding: 0 20px;
-    color: #377e7f;
+    color: #00adff;
     line-height: 1.4em;
     font-size: 0.95em;
     font-weight: 500;
@@ -19,12 +29,12 @@ pre code {
 }
 
 pre code .keyword {
-    color: #333333;
+    color: #fbff00;
     font-weight: 600;
 }
 
 pre code .type {
-    color: #485584;
+    color: #f78484;
     font-weight: 600;
 }
 
@@ -46,7 +56,7 @@ pre code .string {
 }
 
 pre code .comment {
-    color: #6c737c;
+    color: #ffffff85;
 }
 
 pre code .dotAccess {
