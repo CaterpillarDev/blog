@@ -1,3 +1,17 @@
+pre {
+  background-color: #252532 !important;
+  box-shadow: 6px 6px 12px #2c2c3c, -6px -6px 12px #3c3c51 !important;
+}
+
+body {
+  background-color: #343446 !important;
+  color: #fff !important;
+}
+
+a {
+  color: #00b8ff !important;
+}
+
 /*!
  * GitHub Light v0.5.0
  * Copyright (c) 2012 - 2017 GitHub, Inc.
