@@ -42,7 +42,8 @@ Password, or sometimes referred to as passcode, is a secret most commonly used t
 
 #### Cryptographic keys
 
-Keys are usually split into two categorise: 
+Keys are usually split into two categories: 
+
 - Symmetric
 - Asymmetric
 
@@ -71,6 +72,7 @@ Identity is a **combination of private key and certificate** combined together t
 ### Types of storable secrets in keychain
 
 Using keychain, you can store next secret types: 
+
 - password
 - keys
 - certificates
