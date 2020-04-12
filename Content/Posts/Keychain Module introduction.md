@@ -29,6 +29,7 @@ If you want to find out more about details of keychain encryption implementation
 A **secret** is anything used in cryptography that is ideally only known to communicants, usually used for converting plain text to [ciphertext](https://en.wikipedia.org/wiki/Ciphertext), identification or user verification. 
 
 Some of the most common secret types are:
+
 - passwords
 - cryptographic keys
 - cerificates
