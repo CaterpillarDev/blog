@@ -205,10 +205,9 @@ As you can see, the API is really low level and in C style. That's why it can be
 
 ## Resources
 
-- Advanced encryption standard:
-	- [Computerphile](https://www.youtube.com/watch?v=O4xNJsjtN6E&t=163s)
-	- [Wiki](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
-	- [Official RFC](https://tools.ietf.org/html/rfc3394)
+-  AES -> [Computerphile](https://www.youtube.com/watch?v=O4xNJsjtN6E&t=163s)
+- AES -> [Wiki](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
+- AES -> [Official RFC](https://tools.ietf.org/html/rfc3394)
 - [Galois/Counter mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode)
 - [Apple security manual](https://manuals.info.apple.com/MANUALS/1000/MA1902/en_US/apple-platform-security-guide.pdf)
 - [RSA](https://tools.ietf.org/html/rfc3447#section-3.1)
