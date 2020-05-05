@@ -40,13 +40,17 @@ public struct Password {
 
 Always default to `structs instead of classes` to avoid tons of bugs which happen due to mutation in a multithreaded environment. You can find more detail about this in this awesome [article](https://www.avanderlee.com/swift/struct-class-differences/).  
 
-### **`Password attributes`**
+**PASSWORD ATTRIBUTES**
 
 Now we can define set of attributes that will determine our password. These attributes will later be used for `searching` and `retrieving`, as well as `deleting` passwords.
 
 ```swift
+public enum PasswordType {
+    case generic, internet
+}
+
 /// Attributes used for password CRUD operations
-public struct PasswordAttributes: SecretAttributesProtocol {
+public struct PasswordAttributes {
     ///Value is indicating the password's label.
     let label: String
     ///Represents the service associated with password. Available only for generic password.
@@ -98,7 +102,9 @@ extension Password {
 
 Here we can see conversion between provided attributes in a more user-friendly form, as defined in `PasswordAttributes` to API specific `storeAttributes`. When designing an API like this one, you should always define the outside-facing things as simple as possible and deal with complexity inside. That's why we are hiding everything related to `kSec`.
 
-Now we can create a simple struct which will do storing password to `Keychain`, as well as check if it was successful or not :
+## Keychain storing
+
+Now we can create a simple struct which will do storing to `Keychain` independent of type we are storing, as well as check if it was successful or not :
 
 ```swift
 struct StorageService {
@@ -112,6 +118,16 @@ struct StorageService {
 ```
 
 Now we can just use this struct and store our password in a simple fashion.
+
+```swift
+struct SecretsVault {
+    let storageService = StorageService()
+
+    func savePassword(_ password: Password) {
+        storageService.add(attributes: password.storeAttributes, result: nil)
+    }
+}
+```
 
 ## Conclusion
 
