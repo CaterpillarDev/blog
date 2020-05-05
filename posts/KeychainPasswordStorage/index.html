@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="og:site_name" content="caterpillarDev"/><link rel="canonical" href="caterpillarDev.github.io/posts/KeychainPasswordStorage"/><meta name="twitter:url" content="caterpillarDev.github.io/posts/KeychainPasswordStorage"/><meta name="og:url" content="caterpillarDev.github.io/posts/KeychainPasswordStorage"/><title>Secure Password Storage in iOS | caterpillarDev</title><meta name="twitter:title" content="Secure Password Storage in iOS | caterpillarDev"/><meta name="og:title" content="Secure Password Storage in iOS | caterpillarDev"/><meta name="description" content="Personal blog."/><meta name="twitter:description" content="Personal blog."/><meta name="og:description" content="Personal blog."/><meta name="twitter:card" content="summary"/><link rel="stylesheet" href="/primer.css" type="text/css"/><link rel="stylesheet" href="/highlight.css" type="text/css"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="shortcut icon" href="/images/favicon.png" type="image/png"/><link rel="alternate" href="/feed.rss" type="application/rss+xml" title="Subscribe to caterpillarDev"/></head><body><header><div class="border-bottom border-gray-light"><div class="container-md px-3 my-3 markdown-body"><h3><a class="text-gray-dark no-underline" href="/">caterpillar.dev</a></h3></div><div class="d-flex flex-justify-center"><p class="text-small text-gray v-align-middle">Reach me on <a href="https://www.linkedin.com/in/nikolamatijevic">LinkedIn</a> or <a href="https://twitter.com/nmatijevic1">Twitter</a></p></div></div></header><div class="container-md px-3 my-5 markdown-body"><p class="text-small text-gray">30 April 2020</p><p class="text-small text-gray">Reading time: 10mins</p><h1>Secure Password Storage in iOS</h1><p>Login and sign up are now integral parts of every app. It's required to authenticate your user, adjust the content presented, and a lot more. Login is by itself a huge killer for UX, that's why it's one of the most important parts of your app. If a user has to type <code>username</code> and <strong><code>password</code></strong> every time they use your app, you can expect low level of long term adoption.</p><p>That's why you have to do all you can to <code>decrease the fraction</code> here. One of the most common ways is to store your user's credentials and log them in automatically when your app gets launched. Since these pieces of information are highly sensitive, it's very important to store them encrypted. In case you want to find out more about storage in general, you can check <a href="https://caterpillardev.com/posts/SecureDevelopementBasics/">one of my previous articles</a>.</p><h2>Basics and comparison to UserDefaults</h2><p>When it comes to iOS and encrypted storage, your best option is <code>Keychain</code>. But, here comes the hard part.</p><p>Lets take a look at how you get used to doing storage with <em>UserDefaults</em> :</p><pre><code><span class="type">UserDefaults</span>.<span class="property">standard</span>.<span class="call">set</span>(<span class="number">25</span>, forKey: <span class="string">"UserAgeKey"</span>)
+</code></pre><p>This is rather simple. But if you take a look at <code>Keychain</code> API, you cannot do it as simple as with UserDefaults. That's why most of the developers, especially under time pressure, opt for using a Cocoapod (e.g <a href="https://cocoapods.org/pods/KeychainSwift">KeychainSwift</a>). I highly recommend you not to go down this path, since this is <strong><code>the most sensitive</code></strong> information you can store.</p><p>That's why I explained the basics of Keychain API in a simple way in my previous <a href="https://caterpillardev.com/posts/Keychain%20Module%20introduction/">article</a>.</p><h2>Password definition</h2><p>Today, we are taking off where we left off in the above-stated article. We will build storage for passwords.</p><p>First, let's define a basic representation of the password and its attributes:</p><pre><code><span class="keyword">public struct</span> Password {
+    <span class="keyword">let</span> value: <span class="type">String</span>
+    <span class="keyword">let</span> attributes: <span class="type">PasswordAttributes</span>
+}
+</code></pre><p>Always default to <code>structs instead of classes</code> to avoid tons of bugs which happen due to mutation in a multithreaded environment. You can find more detail about this in this awesome <a href="https://www.avanderlee.com/swift/struct-class-differences/">article</a>.<br><br><strong>PASSWORD ATTRIBUTES</strong></p><p>Now we can define set of attributes that will determine our password. These attributes will later be used for <code>searching</code> and <code>retrieving</code>, as well as <code>deleting</code> passwords.</p><pre><code><span class="keyword">public enum</span> PasswordType {
+    <span class="keyword">case</span> generic, internet
+}
+
+<span class="comment">/// Attributes used for password CRUD operations</span>
+<span class="keyword">public struct</span> PasswordAttributes {
+    <span class="comment">///Value is indicating the password's label.</span>
+    <span class="keyword">let</span> label: <span class="type">String</span>
+    <span class="comment">///Represents the service associated with password. Available only for generic password.</span>
+    <span class="keyword">let</span> serviceTag: <span class="type">String</span>?
+    <span class="comment">/// Password type. Either generic or internet.</span>
+    <span class="keyword">let</span> type: <span class="type">PasswordType</span>
+    <span class="comment">/// If set to true, user will be asked to authenticate using Face/Touch ID.
+    /// Mechanism picked and presented by system automatically.</span>
+    <span class="keyword">let</span> demandsUserAutentication: <span class="type">Bool</span>
+    <span class="comment">//If set to true, password is synced through iCloud. Available only for generic password</span>
+    <span class="keyword">var</span> isICloudSyncable: <span class="type">Bool</span> = <span class="keyword">false</span>
+    <span class="comment">///The server's domain name or IP address. Available only for internet password.</span>
+    <span class="keyword">let</span> server: <span class="type">String</span>?
+
+        
+    <span class="keyword">public init</span>(label: <span class="type">String</span>, serviceTag: <span class="type">String</span>?, type: <span class="type">PasswordType</span>, demandsUserAutentication: <span class="type">Bool</span>, server: <span class="type">String</span>?) {
+        <span class="keyword">self</span>.<span class="property">label</span> = label
+        <span class="keyword">self</span>.<span class="property">serviceTag</span> = serviceTag
+        <span class="keyword">self</span>.<span class="property">type</span> = type
+        <span class="keyword">self</span>.<span class="property">demandsUserAutentication</span> = demandsUserAutentication
+        <span class="keyword">self</span>.<span class="property">server</span> = server
+}
+</code></pre><p>This list is extensive, and can be shortened quite a bit. In case you want to find out more about these attributes and other keychain storing attributes, you can checkout official Apple documentation <a href="https://developer.apple.com/documentation/security/keychain_services/keychain_items/item_attribute_keys_and_values#1679100">here</a> under "Password attribute keys".</p><p>Now we need to use these provided attributes to assemble <code>storeAttributes</code>:</p><pre><code><span class="keyword">extension</span> <span class="type">Password</span> {
+    <span class="keyword">var</span> storeAttributes: [<span class="type">String</span> : <span class="type">Any</span>] {
+        <span class="keyword">var</span> attrs: [<span class="type">String</span> : <span class="type">Any</span>] = [
+            kSecClass <span class="keyword">as</span> <span class="type">String</span>: <span class="keyword">self</span>.<span class="property">type</span> == .<span class="dotAccess">generic</span> ? kSecClassGenericPassword : kSecClassInternetPassword,
+            kSecAttrLabel <span class="keyword">as</span> <span class="type">String</span>: <span class="keyword">self</span>.<span class="property">label</span>,
+            kSecAttrSynchronizable <span class="keyword">as</span> <span class="type">String</span>: <span class="keyword">self</span>.<span class="property">isICloudSyncable</span> <span class="keyword">as</span> <span class="type">CFBoolean</span>
+        ]
+        <span class="keyword">if self</span>.<span class="property">type</span> == .<span class="dotAccess">generic</span>, <span class="keyword">let</span> tag = <span class="keyword">self</span>.<span class="property">serviceTag</span> {
+            attrs[kSecAttrService <span class="keyword">as</span> <span class="type">String</span>] = tag
+        }
+        <span class="keyword">if self</span>.<span class="property">type</span> == .<span class="dotAccess">internet</span>, <span class="keyword">let</span> server = <span class="keyword">self</span>.<span class="property">server</span> {
+            attrs[kSecAttrServer <span class="keyword">as</span> <span class="type">String</span>] = server
+        }
+    }
+    attrs[kSecValueData <span class="keyword">as</span> <span class="type">String</span>] = <span class="type">Data</span>(<span class="keyword">self</span>.<span class="property">value</span>.<span class="property">utf8</span>)
+    <span class="keyword">return</span> attrs
+}
+
+</code></pre><p>Here we can see conversion between provided attributes in a more user-friendly form, as defined in <code>PasswordAttributes</code> to API specific <code>storeAttributes</code>. When designing an API like this one, you should always define the outside-facing things as simple as possible and deal with complexity inside. That's why we are hiding everything related to <code>kSec</code>.</p><h2>Keychain storing</h2><p>Now we can create a simple struct which will do storing to <code>Keychain</code> independent of type we are storing, as well as check if it was successful or not :</p><pre><code><span class="keyword">struct</span> StorageService {
+    <span class="keyword">func</span> add(attributes: [<span class="type">String</span>: <span class="type">Any</span>], result: <span class="type">UnsafeMutablePointer</span>&lt;<span class="type">CFTypeRef</span>?&gt;?) <span class="keyword">throws</span> {
+        <span class="keyword">let</span> status = <span class="type">SecItemAdd</span>(attributes <span class="keyword">as</span> <span class="type">CFDictionary</span>, result)
+        <span class="keyword">guard</span> status == errSecSuccess <span class="keyword">else</span> {
+            <span class="comment">//throw error here</span>
+        }
+    }
+}
+</code></pre><p>Now we can just use this struct and store our password in a simple fashion.</p><pre><code><span class="keyword">struct</span> SecretsVault {
+    <span class="keyword">let</span> storageService = <span class="type">StorageService</span>()
+
+    <span class="keyword">func</span> savePassword(<span class="keyword">_</span> password: <span class="type">Password</span>) {
+        storageService.<span class="call">add</span>(attributes: password.<span class="property">storeAttributes</span>, result: <span class="keyword">nil</span>)
+    }
+}
+</code></pre><h2>Conclusion</h2><p>Some of you, who are more experienced, might notice that there are no protocols wrapping our implementations and it would be hard to avoid dependencies between components and do Unit tests. We will take care of this in one of the next articles, where I will dive deeper into these specific topics and extend our so far simple Keychain wrapper. If you find anything unclear, feel free to reach me on <a href="https://www.linkedin.com/in/nikolamatijevic">LinkedIn</a> or <a href="https://twitter.com/nmatijevic1">Twitter</a> or take a look in official Apple documentation. Also, in case you have any questions or feedback, I will be more than glad to hear.</p><h2>Resources</h2><ul><li><a href="https://caterpillardev.com/posts/SecureDevelopementBasics/">Security basics article</a> (different storage types explained)</li><li><a href="https://caterpillardev.com/posts/Keychain%20Module%20introduction/">Keychain basics article</a></li><li><a href="https://cocoapods.org/pods/KeychainSwift">KeychainSwift CocoaPod</a></li><li><a href="https://www.avanderlee.com/swift/struct-class-differences/">Classes and structs in depth</a></li><li><a href="https://developer.apple.com/documentation/security/keychain_services/keychain_items/item_attribute_keys_and_values#1679100">Keychain item attributes</a></li></ul></div><footer><div class="container-md px-3 my-5 markdown-body"><div class="d-flex flex-justify-center"><p class="text-small text-gray v-align-middle">Styled with <a href="https://primer.style">Primer</a> | Generated using <a href="https://github.com/johnsundell/publish">Publish</a> | Hosted on <a href="https://pages.github.com">GitHub Pages</a></p></div></div></footer></body></html>
