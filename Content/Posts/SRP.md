@@ -1,10 +1,17 @@
-#	SOLID Principles with examples
+---
+date: 2020-05-16 23:00
+readingTime: 10
+section: Advanced programming knowledge
+---
 
 
-![](/Users/nikolamatijevic/Downloads/christian-cagni-2DLXpYB9_SQ-unsplash.jpg)
+#	SOLID Principles - Introduction and SRP
 
 
-As your project grows, having some really simple design patterns simply isn't going to be enough. If you don't know why, please check out my previous articles on [MVC](https://caterpillardev.com/posts/MVC/) and [MVVM](https://caterpillardev.com/posts/MVVM/). If you are interested in other design patterns like MVP or VIPER, please check out this youtube [series](https://www.youtube.com/playlist?list=PLyjgjmI1UzlSWtjAMPOt03L7InkCRlGzb). This was one of my first architectural knowledge sources.
+![](/images/brickWall.jpg)
+
+
+As your project grows, having some really simple design patterns aren't going to be enough. If you don't know why, please check out my previous articles on [MVC](https://caterpillardev.com/posts/MVC/) and [MVVM](https://caterpillardev.com/posts/MVVM/). If you are interested in other design patterns like MVP or VIPER, please check out this youtube [series](https://www.youtube.com/playlist?list=PLyjgjmI1UzlSWtjAMPOt03L7InkCRlGzb). This was one of my first architectural knowledge sources.
 
 If this problem doesn't seem big enough for you to invest effort into, you are wrong. Just trust me on this one. Architectural knowledge is the one I benefited the most from in my career so far.
 
@@ -37,7 +44,7 @@ Let's dive right in.
 ## Single Responsibility Principle (SRP)
 
 Out of all principles, SRP is one that's most mistakenly interpreted.
-What you can mostly see as an interpretation is:
+What you can see as an interpretation is:
 
 > ~~“ Module should have one, and only one, reason to change. ”~~
 
@@ -49,15 +56,15 @@ But, this is not entirely true. What is a the reason in this case? This is simpl
 
 Looking at an example will probably make this a lot clearer for you. My preferred way is to look at what should **not** be done, and from there derive the right approach. Let's take a look at something you have probably done by now since all apps are communicating to servers nowadays. 
 
-![](/Users/nikolamatijevic/Desktop/SRP.png)
+![](/images/SRP.png)
 
 In this example, we can see that this class has 3 separate functionalities. The problem is that these functionalities are used by 3 different actors.
 
 #### PROBLEM
 
-These functions would probably be called in the following order.
+These functions would probably be called in the following order:
 
-![](/Users/nikolamatijevic/Desktop/SRP_flow.png)
+![](/images/SRP_flow.png)
 
 Now we have three different actors, each determining what their functionality does. This easily leads to breaking each other's code since functionalities are dependant on each other. This is a source of bugs that are hard to trace and make your software a lot more prone to bugs.
 
@@ -65,14 +72,14 @@ Now we have three different actors, each determining what their functionality do
 
 The solution is quite simple. We can easily solve this issue by breaking down out `DataHandler` class into separate components that will then be used by another component which will assemble them together. 
 
-![](/Users/nikolamatijevic/Desktop/SRP_solution.png)
+![](/images/SRP_solution.png)
 
 What this gives us is a clear separation of concerns, classes being entirely standalone and having a `single responsibility`. They are also agnostic of all other components, which makes testing / adjusting / replacing these components really simple.
 
 
 ## Conclusion
 
-In this article, you could see the importance of the first SOLID principle. In the next article, I will further try to explain other principles and their benefits. None of this is relevant if you don't apply what you learned. Go and analyze your existing projects, and start implementing the first principle. That's the only actual way to learn. I am also referencing one of the most amazing books I read in my life from computer science area. You can find it in References down below. This book was the first resource I had when it comes  to SOLID, and I always have a copy of it on my desk.
+In this article, you could see the importance of the first SOLID principle. In the next article, I will further try to explain other principles and their benefits. None of this is relevant if you don't apply what you learned. Go and analyze your existing projects, and start implementing the first principle. That's the only actual way to learn. I am also referencing one of the most amazing computer science books I read in my life. You can find it in References down below. This book was the first resource I had when it comes  to SOLID, and I always have a copy of it on my desk.
 
 If some stuff here is not clear enough, feel free to reach me on  [LinkedIn](https://www.linkedin.com/in/nikolamatijevic) or [Twitter](https://twitter.com/nmatijevic1) or even change my mind. 
 
