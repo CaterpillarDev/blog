@@ -88,6 +88,7 @@ If some stuff here is not clear enough, feel free to reach me on  [LinkedIn](htt
 
 - [MVC article](https://caterpillardev.com/posts/MVC/)
 - [MVVM article](https://caterpillardev.com/posts/MVVM/)
+- [ Architecture series on Youtube](https://www.youtube.com/playlist?list=PLyjgjmI1UzlSWtjAMPOt03L7InkCRlGzb)
 
 
 ## Sources
