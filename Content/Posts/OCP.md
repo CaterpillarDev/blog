@@ -77,6 +77,7 @@ I cannot express the importance of this enough!
 > **Dependencies determine privileges.**
 
 Let's take a look at protocols a bit and why they are positioned in the way they are. If we take a look at our Interactor, we can see that it has a dependency to the `DataProvider` **interface**. What is important is to 
+
 > never depend on concrete implementations, always point to abstractions.
 
 What this allows us is not to depend on internal implementations of functions defined in protocols. As long as input (function attributes) and output (return type) are the same, the component that implements the protocol can be tested and even deployed separately.
