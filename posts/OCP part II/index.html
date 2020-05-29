@@ -1,0 +1,103 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="og:site_name" content="caterpillarDev"/><link rel="canonical" href="caterpillarDev.github.io/posts/OCP%20part%20II"/><meta name="twitter:url" content="caterpillarDev.github.io/posts/OCP%20part%20II"/><meta name="og:url" content="caterpillarDev.github.io/posts/OCP%20part%20II"/><title>SOLID Principles - Open Closed Principle (2/2) | caterpillarDev</title><meta name="twitter:title" content="SOLID Principles - Open Closed Principle (2/2) | caterpillarDev"/><meta name="og:title" content="SOLID Principles - Open Closed Principle (2/2) | caterpillarDev"/><meta name="description" content="Personal blog."/><meta name="twitter:description" content="Personal blog."/><meta name="og:description" content="Personal blog."/><meta name="twitter:card" content="summary"/><link rel="stylesheet" href="/primer.css" type="text/css"/><link rel="stylesheet" href="/highlight.css" type="text/css"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="shortcut icon" href="/images/favicon.png" type="image/png"/><link rel="alternate" href="/feed.rss" type="application/rss+xml" title="Subscribe to caterpillarDev"/></head><body><header><div class="border-bottom border-gray-light"><div class="container-md px-3 my-3 markdown-body"><h3><a class="text-gray-dark no-underline" href="/">caterpillar.dev</a></h3></div><div class="d-flex flex-justify-center"><p class="text-small text-gray v-align-middle">Reach me on <a href="https://www.linkedin.com/in/nikolamatijevic">LinkedIn</a> or <a href="https://twitter.com/nmatijevic1">Twitter</a></p></div></div></header><div class="container-md px-3 my-5 markdown-body"><p class="text-small text-gray">19 May 2020</p><p class="text-small text-gray">Reading time: 15mins</p><h1>SOLID Principles - Open Closed Principle (2/2)</h1><p>This article is a continuation of the introductory <a href="https://caterpillardev.com/posts/OCP/">article</a> to the Open-Closed principle. In case you haven't read that one, I highly recommend doing that prior to reading this one. In my prior article, I focused more on the theoretical foundation of this principle. So let's take a look at the example we began with last time:</p><img src="/images/OCP_example_flow.png"/><h2>Problem</h2><p>Changes in the way we generate Web reports <strong>affect</strong> PDF report generation and vice versa. This should be avoided if possible. By affect, what I mean is that changes in code of <code>web report generation</code> could cause <code>bugs/crashes</code> when we generate a <code>PDF report</code>. Let's see how we can avoid these issues.</p><p>If we take a look at our feature again, we can divide it into two segments:</p><ul><li>report calculation</li><li>result presentation</li></ul><p>Our initial code structure could look something like this:</p><pre><code><span class="keyword">struct</span> DataProvider {
+    <span class="keyword">func</span> fetchDataFromServer(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">Data</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>) {
+        <span class="comment">// call to the server
+        // fetch data
+        // parse response</span>
+    }
+}
+</code></pre><p>This component <code>talks to our web server via internet</code> and gets the latest data for a specific user. We will then use this data to feed it into our logic component.</p><blockquote><p>For simplicity purposes, I will just use function signatures and skip all the logic inside, since it's irrelevant for our topic.</p></blockquote><pre><code><span class="keyword">struct</span> FinancialAnalyzer {
+    <span class="keyword">let</span> dataProvider = <span class="type">DataProvider</span>()
+
+    <span class="keyword">func</span> analyzeData(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">FinancialData</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>) {
+        dataProvider.<span class="call">fetchDataFromServer</span> { result <span class="keyword">in
+            switch</span>  result {
+            <span class="keyword">case</span> .<span class="dotAccess">success</span>(<span class="keyword">let</span> data):
+                <span class="comment">// perform logic here
+                // completion with success</span>
+            <span class="keyword">case</span> .<span class="dotAccess">failure</span>(<span class="keyword">let</span> error):
+                <span class="comment">// completion with failure</span>
+            }
+        }
+    }
+}
+</code></pre><p>This is where the most important piece of our code is. It does all the <strong><code>logic</code></strong> of our app. It basically represents what the business would look like if it wasn't an app.</p><pre><code><span class="keyword">struct</span> PDFReportGenerator {
+    <span class="keyword">let</span> analyzer = <span class="type">FinancialAnalyzer</span>()
+
+    <span class="keyword">func</span> generateReport() {
+        <span class="comment">// call analyzer.analyzeData
+        // get result
+        // present report||error</span>
+        }
+}
+</code></pre><pre><code><span class="keyword">struct</span> WebReportGenerator {
+    <span class="keyword">let</span> analyzer = <span class="type">FinancialAnalyzer</span>()
+
+    <span class="keyword">func</span> generateReport() {
+        <span class="comment">// call analyzer.analyzeData
+        // get result
+        // present report||error</span>
+        }
+}
+</code></pre><p>These are two components that use our logic component, generate the report and present it to the user.</p><p>Now we can discuss our problems in more detail.</p><p>First thing is that now our <code>FinancialAnalyzer</code> provides a <code>FinancialData</code> struct in case of success. In case our Web report now needs some more/less data, we would need to change the signature of this function and all the logic inside it. Even though this seems obvious and logical, what now happens is that <code>PDFGenerator is broken</code>. The code won't even compile.</p><p>The second issue is that all our components are tightly coupled and directly referencing each other. This is really hard to test because you cannot mock any of these components. It's hard to maintain because changes in one component affect all the components in the stream below, as we could see in the first issue also.</p><p><strong>This is just the tip of the issues iceberg</strong>. Let's see how we can solve these issues quite easily.</p><h2>Solution</h2><p>Let's first solve the second issue, since its solution will help us solve the first issue too. The issue we have is</p><blockquote><p>we are referencing concrete implementations (classes/structs) instead of abstractions (protocols).</p></blockquote><p>How do we solve this? By simply wrapping all of our components in protocols. For example, our <code>DataProvider</code> could now look something like:</p><pre><code><span class="keyword">protocol</span> DataProviderProtocol {
+    <span class="keyword">func</span> fetchDataFromServer(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">Data</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>)
+}
+<span class="keyword">struct</span> DataProvider: <span class="type">DataProviderProtocol</span> {
+    <span class="keyword">func</span> fetchDataFromServer(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">Data</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>) {
+        <span class="comment">// call to the server
+        // fetch data
+        // parse response</span>
+    }
+}
+</code></pre><p>The next step is adjusting our <code>Interactor</code> so it doesn't use the concrete implementation (DataProvider) but use the newly created protocol.</p><blockquote><p><strong>The following code samples are showing diffs instead of full code. Rest of the code either stays the same or is intuitively substitutable.</strong></p></blockquote><pre><code><span class="keyword">struct</span> FinancialAnalyzer {
+    <span class="keyword">let</span> dataProvider: <span class="type">DataProviderProtocol</span>
+
+    <span class="keyword">init</span>(dataProvider: <span class="type">DataProviderProtocol</span>) {
+        <span class="keyword">self</span>.<span class="property">dataProvider</span> = dataProvider
+    }
+
+}
+</code></pre><p>What advantages does this bring to us? - we now have two isolated components that <strong>do not depend</strong> on each other - we can now test and changes these components in isolation without it affecting other components - we can change internal implementation of one component, without other components even knowing - another benefit, which may not be really obvious is that we could entirely swap our data provider (e.g move from web server to local file storage provider) without our <code>Interactor</code> knowing, just by applying protocol conformance to our new provider. - we are also now doing dependency injection. You can read about the benefits of it <a href="https://en.wikipedia.org/wiki/Dependency_injection">here</a>.</p><p>The last one is really huge, and it will soon bring us to another design pattern, which is called <code>Dependency composition</code>, also known as <code>Composition root</code>. In case you are interested, you can find more information <a href="https://www.youtube.com/watch?v=cnHo2-gxqIQ&t=194s">here</a>.</p><p><strong><code>Dependency injection</code></strong> and <strong><code>Composition root</code></strong> together bring a way looser code and improve your code quality drastically. I highly suggest applying these to your architecture right away, it's impossible not to see the benefits.</p><h3>Next steps</h3><p>We should now apply the same exact process to the Interactor and other components. Proper naming of the components can be found in the graph in my <a href="https://caterpillardev.com/posts/OCP/">previous article</a>.</p><p>Let me explain the components we haven't touched so far.</p><ul><li><strong>Entity</strong> is the most important component of your app. Interactor is the place where all the business logic is, but entity is a data structure that represents data used in that logic. Therefore, the <strong>Interactor depends on the Entity</strong>. Entity is the least likely to change out of all the components, if you plan it well. In our example, it would be data representation of the report we want to present later, <code>in the form most appropriate for applying logic</code>. It is really important not to define your entities according to your UI representation, because then entity will change when your UI changes which will lead to whole app indirectly depending on your UI. The whole point is to avoid this. We will change our Entity into UI representable object inside of our UI layer, more concretely in our <code>ViewModel</code>.</li></ul><ul><li><strong>ViewModel</strong> is part of UI layer. Its purpose is to take results from interactor and adjust them to be in accordance with the way we want to present them.</li></ul><ul><li><strong>View</strong> is the Xib or Storyboard we are using to present data from <code>ViewModel</code>. You should default to Xibs always, due to many advantages. All the things discussed above would not be possible with Storyboards (without workarounds).</li></ul><ul><li><strong>WebServer component</strong> is the component communicating with the server, fetching the data, parsing it (also known as creating a DTO), turning that DTO into an entity and passing it along to <code>Interactor</code> component.</li></ul><ul><li><strong>Controller</strong> is not necessary in case of this feature, so we will leave it out.</li></ul><p>Let's adjust our code to match these rules. This means that our <code>DataProvider</code> cannot simply return data as <code>Data</code>. It has to transfer data into an entity that will be consumed by Interactor. For simplicity purposes, I will use an empty struct, since those details are irrelevant for this topic.</p><pre><code><span class="keyword">protocol</span> DataProviderProtocol {
+    <span class="keyword">func</span> fetchDataFromServer(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">EntityToBeConsumedByInteractor</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>)
+}
+<span class="keyword">struct</span> DataProvider: <span class="type">DataProviderProtocol</span> {
+    <span class="keyword">func</span> fetchDataFromServer(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">EntityToBeConsumedByInteractor</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>) {
+        <span class="comment">// call to the server
+        // fetch data
+        // parse response</span>
+    }
+}
+</code></pre><p>Now we will use it in our interactor to turn it to new entity which is result of calculations performed, and pass that new entity down the stream to our <code>ViewModel</code>.</p><p>First, we need to rename our FinancialAnalyzer to an <code>Interactor</code> and then define a protocol to wrap around our <code>Interactor</code>. Those protocols are usually named <code>UseCases</code>.</p><pre><code><span class="keyword">protocol</span> FinancialAnalyzisUseCase {
+	<span class="keyword">func</span> analyzeData(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">FinancialData</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>) 
+}
+<span class="keyword">struct</span> FinancialAnalyzisInteractor: <span class="type">FinancialAnalyzisUseCase</span> {
+    <span class="keyword">let</span> dataProvider: <span class="type">DataProviderProtocol</span>
+
+    <span class="keyword">init</span>(dataProvider: <span class="type">DataProviderProtocol</span>) {
+        <span class="keyword">self</span>.<span class="property">dataProvider</span> = dataProvider
+    }
+}
+</code></pre><p>Even though it may seem component only got wrapped by a protocol and renamed, by having constant naming conventions such as <code>Interactors</code> being logic components, it's quite simple to pinpoint issues when they arise and find your way around the project overall.</p><p>We now have a way clearer <strong>separation of concerns</strong> and responsibilities of each layer are perfectly defined.</p><p>When it comes to doing the UI work itself, we still have two different presentations. What I would suggest in this case is starting with the <strong>single ViewModel</strong>. ViewModels are more characteristic for reactive programming, but since it is future of iOS development with <code>Combine</code> and <code>SwiftUI</code>, I consider this an appropriate example.</p><p>What we need to do is inject the <code>UseCase</code> as a dependency to our <code>ViewModel</code> and communicate with it. This substitutes all the logic that was earlier done in the view components.</p><p>When it comes to <code>Views</code>, they should be one of your <code>dumbest</code> components, so to say. Absolutely zero logic should be in your views. All their responsibilities are <strong>reflecting changes in ViewModel on the screen</strong>. Nothing else.</p><p>If you are not familiar with how MVVM works, I would suggest this <a href="https://medium.com/swlh/getting-started-with-swiftui-and-combine-using-mvvm-and-protocols-for-ios-d8c37731a1d9">article</a> if you have basic theoretical understanding. If not, please check out my prior <a href="https://caterpillardev.com/posts/MVVM/">article</a> about MVVM in general.</p><pre><code><span class="keyword">struct</span> ViewModel: <span class="type">PDFViewModelProtocol</span>, <span class="type">WebReportViewModelProtocol</span> {
+    <span class="keyword">let</span> dependencies: <span class="type">ViewModelDependencies</span>
+
+    <span class="keyword">init</span>(dependencies: <span class="type">ViewModelDependencies</span>) {
+        <span class="keyword">self</span>.<span class="property">dependencies</span> = dependencies
+    }
+
+    <span class="keyword">func</span> fetchUserFinancialData(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">FinancialData</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>) {
+        <span class="comment">// call use case
+        // get data
+        // pass it to the view</span>
+    }
+}
+
+<span class="keyword">protocol</span> PDFViewModelProtocol {
+    <span class="keyword">func</span> fetchUserFinancialData(completion:  <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">FinancialData</span>, <span class="type">Error</span>&gt;) -&gt; <span class="type">Void</span>)
+}
+
+<span class="keyword">struct</span> PDFView {
+    <span class="keyword">let</span> viewModel: <span class="type">ViewModel</span>
+
+    <span class="comment">// use view model to fetch data
+    // present result</span>
+}
+</code></pre><h1>Conclusion</h1><p>This is a huge one, but I certainly assure you, it will be really valuable once you get the full grasp of it.</p><blockquote><p><strong>If I could pick one thing I learned so far in my career, it would be this principle.</strong></p></blockquote><p>I advise you to once again go and read both articles from scratch. Take notes, compare it with your own code. Fix your own code to be in accordance with this principle. Nothing beats the actual work.</p><p>If some stuff here is not clear enough, feel free to reach me on <a href="https://www.linkedin.com/in/nikolamatijevic">LinkedIn</a> or <a href="https://twitter.com/nmatijevic1">Twitter</a> or even change my mind.</p><p>Happy reading!</p><h1>References</h1><ul><li><a href="https://caterpillardev.com/posts/OCP/">Intro OCP article</a></li><li><a href="https://www.youtube.com/watch?v=cnHo2-gxqIQ&t=194s">Composition root</a></li><li><a href="https://en.wikipedia.org/wiki/Dependency_injection">Dependency injection</a></li><li><a href="https://caterpillardev.com/posts/MVVM/">MVVM - theoretical basics</a></li><li><a href="https://medium.com/swlh/getting-started-with-swiftui-and-combine-using-mvvm-and-protocols-for-ios-d8c37731a1d9">MVVM with SwiftUI and Combine</a></li></ul><h1>Abbreviations</h1><ul><li>DTO -&gt; Data Transfer Object</li></ul></div><footer><div class="container-md px-3 my-5 markdown-body"><div class="d-flex flex-justify-center"><p class="text-small text-gray v-align-middle">Styled with <a href="https://primer.style">Primer</a> | Generated using <a href="https://github.com/johnsundell/publish">Publish</a> | Hosted on <a href="https://pages.github.com">GitHub Pages</a></p></div></div></footer></body></html>
